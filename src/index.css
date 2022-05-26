@@ -1,7 +1,6 @@
 body {
     margin: 0;
     background-color: #0B2434;
-    padding: 20px;
     font-family: "Karla";
 }
 
@@ -21,12 +20,23 @@ body {
     text-align: center;
 }
 
+.main-container {
+    display: grid;
+    grid-template: 1fr 2fr 1fr/ 1fr 2fr 1fr;
+    /* - align the number to the center (horizontally) */
+    justify-content: center;
+    /* - align the number to the center (vertically) */
+    align-items: center;
+}
+
 main {
+    grid-row: 2/3;
+    grid-column: 2/3;
     background-color: #F5F5F5;
-    height: 400px;
-    max-width: 800px;
+    height: 500px;
+    max-width: 700px;
     border-radius: 5px;
-    padding: 20px;
+    padding: 60px;
     /* FLEX menu: */
     display: flex;
     /* spread evenly in column */
@@ -43,7 +53,7 @@ main {
     display: grid;
     /* 2 rows each of size auto. 5 column will fill up  */
     grid-template: auto auto / repeat(5, 1fr);
-    grid-gap: 40px;
+    grid-gap: 20px;
 }
 
 .die-face {
@@ -69,6 +79,7 @@ main {
 button {
     height: 50px;
     width: 120px;
+    margin-top: 50px;
     background-color: #5035FF;
     color: white;
     border-radius: 5px;
@@ -84,4 +95,8 @@ button:focus {
 
 button:active {
     box-shadow: inset 5px 5px 10px -3px rgba(0, 0, 0, 0.7);
+}
+
+.time-container {
+    display: flex;
 }

@@ -12,13 +12,14 @@ function getRandomInt(max) {
 function App() {
   // 1. init the state of the dice array. Lazy init
   const [diceStateArr, setDiceStateArr] = React.useState(() => initDiceArray());
-  const [tenzies, setTenzies] = React.useState(
-    {
-      win: false,
-      startTime: performance.now(),
-      endTime: 0,
-      elapsedTime: 0
-    });
+  const [tenzies, setTenzies] = React.useState(false);
+  const [duration, setDuration] = React.useState({
+    secondDisplay: 0,
+    msDisplay: 0,
+    msTotal: 0
+  });
+  const [isGameOn, setIsGameOn] = React.useState(() => { return true });
+
 
   // 2. generate new dice array - only called once
   // Start timer here
@@ -51,6 +52,14 @@ function App() {
       holdDice={setArrHoldDie} />
   });
 
+  function resetTimer() {
+    setDuration({
+      secondDisplay: 0,
+      msDisplay: 0,
+      msTotal: 0
+    });
+  }
+
   // 4. Check the winning state everytime diceState array changed
   // use useEffect because we are dealing with multiple states:
   // check dice array state, and set tenzies state
@@ -67,17 +76,8 @@ function App() {
 
     // If won
     if (allEqual && allHeld) {
-      setTenzies(prevTenzies => {
-        console.log("start time:" + prevTenzies.startTime);
-        console.log("end time:" + performance.now());
-        // get end time and elapsed time
-        return {
-          ...prevTenzies,
-          win: true,
-          endTime: performance.now(),
-          elapsedTime: Math.round((performance.now() - prevTenzies.startTime) / 1000)
-        }
-      });
+      setTenzies(true);
+      setIsGameOn(false);
     }
   }, [diceStateArr])
 
@@ -101,22 +101,42 @@ function App() {
     })
   }
 
+  React.useEffect(() => {
+    let interval = null;
+
+    // if game is on start counting
+    if (isGameOn) {
+      interval = setInterval(() => {
+        setDuration(prevDuration => {
+
+
+          return {
+            secondDisplay: (prevDuration.msTotal + 1) > 1000 ? Math.round((prevDuration.msTotal + 1) / 1000) : 0,
+            msDisplay: (prevDuration.msTotal + 1) % 1000,
+            msTotal: (prevDuration.msTotal + 1)
+          }
+
+        });
+      }, 1);
+
+      // clean up if
+    } else if (!isGameOn && (duration.msTotal !== 0)) {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [isGameOn, duration]);
 
   // 5.2 called at every clicking "roll"
   function rollOrNewGame() {
-    // if tenzies (won)
-    if (tenzies.win === true) {
-      console.log("new game--->" + tenzies.startTime);
-      setTenzies({
-        win: false,
-        startTime: performance.now(),
-        endTime: 0,
-        elapsedTime: 0
-      });
+
+    // if play new Game after winning
+    if (tenzies === true) {
+      setTenzies(false);
+      resetTimer();
+      setIsGameOn(true);
       setDiceStateArr(initDiceArray)
 
     } else { //else roll
-
       // - get new diceArray
       setDiceStateArr(prevDiceArr => {
         // - return a new mapped dice
@@ -134,21 +154,25 @@ function App() {
         })
       })
     }
-
   }
 
-
   return (
-    <div>
+    <div className="main-container">
       <main>
         <h1 className="title">Tenzies</h1>
         <p className="instructions">Roll until all dice are the same. Click each die to freeze it at its current value between rolls.</p>
+        <div className="time-container">
+          <h3> {duration.secondDisplay}</h3>
+          <h3> : </h3>
+          <h3>{duration.msDisplay}</h3>
+          <h3>seconds taken!</h3>
+        </div>
         <div className="die-container">
           {dieJSXElements}
         </div>
         {/* onclick only takes void function */}
-        <button onClick={rollOrNewGame}>{tenzies.win ? "New Game" : "Roll"}</button>
-        {tenzies.win && <Confetti /> && <p>{tenzies.elapsedTime} seconds taken!</p>}
+        <button onClick={rollOrNewGame}>{tenzies ? "New Game" : "Roll"}</button>
+        {tenzies && <Confetti />}
       </main >
     </div >
   );
