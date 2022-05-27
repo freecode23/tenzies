@@ -13,13 +13,14 @@ function App() {
   // 1. init the state of the dice array. Lazy init
   const [diceStateArr, setDiceStateArr] = React.useState(() => initDiceArray());
   const [tenzies, setTenzies] = React.useState(false);
+
   const [duration, setDuration] = React.useState({
-    secondDisplay: 0,
-    msDisplay: 0,
+    minDisplay: "00",
+    secondDisplay: "0",
+    msDisplay: "0",
     msTotal: 0
   });
   const [isGameOn, setIsGameOn] = React.useState(() => { return true });
-
 
   // 2. generate new dice array - only called once
   // Start timer here
@@ -40,8 +41,6 @@ function App() {
     return newDiceArr;
   }
 
-
-
   // 3. create the array die JSX elements using map - called at every roll
   const dieJSXElements = diceStateArr.map(dieObj => {
     return <Die
@@ -54,8 +53,9 @@ function App() {
 
   function resetTimer() {
     setDuration({
-      secondDisplay: 0,
-      msDisplay: 0,
+      minDisplay: "00",
+      secondDisplay: "00",
+      msDisplay: "000",
       msTotal: 0
     });
   }
@@ -108,14 +108,26 @@ function App() {
     if (isGameOn) {
       interval = setInterval(() => {
         setDuration(prevDuration => {
+          const secondsfloat = (prevDuration.msTotal + 1) / 1000;
 
+          const min = String(Math.floor(secondsfloat / 60));
+          console.log("ms:" + prevDuration.msTotal);
+          const secOnly = String(secondsfloat % 60).split(".")[0];
+          let msOnly = String(secondsfloat).split(".")[1];
+          // Question error here + I only wantn to take the first 2
+          // if (msOnly.length > 2) {
+          //   console.log(msOnly);
+          //   msOnly = msOnly.substring(0, 2);
+          //   console.log(msOnly[0] + msOnly[1]);
 
+          // }
+          // console.log(`${min} : ${secondsfloat}`);
           return {
-            secondDisplay: (prevDuration.msTotal + 1) > 1000 ? Math.round((prevDuration.msTotal + 1) / 1000) : 0,
-            msDisplay: (prevDuration.msTotal + 1) % 1000,
-            msTotal: (prevDuration.msTotal + 1)
+            minDisplay: min.length > 1 ? min : "0" + min,
+            secondDisplay: secOnly.length > 1 ? secOnly : "0" + secOnly,
+            msDisplay: msOnly,
+            msTotal: prevDuration.msTotal + 1
           }
-
         });
       }, 1);
 
@@ -128,10 +140,16 @@ function App() {
 
   // 5.2 called at every clicking "roll"
   function rollOrNewGame() {
-
+    const min = Math.floor(61.918 / 60);
+    console.log(`${min
+      } : ${60.918} `);
     // if play new Game after winning
     if (tenzies === true) {
       setTenzies(false);
+
+      // Question: If I want to refactor time component to another JS file, how can I do reset timer when game ends ?
+      // This is resetting the object. So I cannot keep the duration object in timer.js?
+      // I have to pass on the timer object?
       resetTimer();
       setIsGameOn(true);
       setDiceStateArr(initDiceArray)
@@ -161,12 +179,26 @@ function App() {
       <main>
         <h1 className="title">Tenzies</h1>
         <p className="instructions">Roll until all dice are the same. Click each die to freeze it at its current value between rolls.</p>
+
+        {/* Question3: What's the best way to refactor this? */}
         <div className="time-container">
-          <h3> {duration.secondDisplay}</h3>
-          <h3> : </h3>
-          <h3>{duration.msDisplay}</h3>
-          <h3>seconds taken!</h3>
+          <div className="time-cell time-cell-left">
+            <h3> {duration.minDisplay}</h3>
+          </div>
+          <div className="time-cell time-cell-dot">
+            <h3>:</h3>
+          </div>
+          <div className="time-cell">
+            <h3>{duration.secondDisplay}</h3>
+          </div>
+          <div className="time-cell time-cell-dot">
+            <h3>.</h3>
+          </div>
+          <div className="time-cell time-cell-right">
+            <h3> {duration.msDisplay}</h3>
+          </div>
         </div>
+
         <div className="die-container">
           {dieJSXElements}
         </div>
