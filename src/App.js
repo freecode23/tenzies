@@ -10,11 +10,10 @@ function getRandomInt(max) {
 }
 
 function App() {
-  // 1. init the state of the dice array. Lazy init
+  // 1. Initialize all states. Lazy init the array since we are using function
   const [diceStateArr, setDiceStateArr] = React.useState(() => initDiceArray());
   const [isGameOn, setIsGameOn] = React.useState(() => { return true });
   const [isWon, setIsWon] = React.useState(false); // winning state
-
   const [timer, setTimer] = React.useState({
     minDisplay: "00",
     secondDisplay: "0",
@@ -23,6 +22,7 @@ function App() {
   });
 
   // 2. Generate new dice array - only called once
+  // this function will get called at every render if we dont do lazy init
   function initDiceArray() {
     const newDiceArr = [];
     for (let i = 0; i < 10; i++) {
